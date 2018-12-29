@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>交通态势首页</title>
+
+		<h1 style="margin: 30px 0px 0px 50px;">欢迎使用高德地图交通态势查询网站</h1>
+
+		<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+
+
+
+		<form id='traffic_form' class="pure-form pure-form-stacked" style="margin: 30px 0px 0px 50px;">
+			<fieldset>
+				<legend>请选择查询类型</legend>
+				<label for="option-two" class="pure-radio">
+					<input id="option-two" type="radio" onclick="retangleClick()" name="trafficRadio" value="retangle" checked>
+					矩形区域交通态势查询
+				</label>
+
+				<label for="option-three" class="pure-radio">
+					<input id="option-three" type="radio" onclick="circleClick()" name="trafficRadio" value="circle">
+					圆形区域交通态势查询
+				</label>
+				<label for="option-three" class="pure-radio">
+					<input id="option-three" type="radio" onclick="roadClick()" name="trafficRadio" value="road">
+					指定路线交通态势查询
+				</label>
+
+				<div class="pure-g">
+					<div id="retangle_div" class="pure-u-1 pure-u-md-1-3">
+						<label for="first-name">矩形范围</label>
+						<input id="retangle_value" class="pure-input-1-2" type="text" value="116.351147,39.966309;116.357134,39.968727">
+					</div>
+
+
+					<div id="circle_div" class="pure-u-1 pure-u-md-1-3">
+						<div class="pure-u-1 pure-u-md-1-3">
+							<label for="last-name">圆形中心坐标</label>
+							<input id="circle_location" class="pure-input-1-2" type="text">
+						</div>
+
+						<div name="circle_div" class="pure-u-1 pure-u-md-1-3">
+							<label for="email">圆形区域半径</label>
+							<input id="circle_radius" class="pure-input-1-2" type="email" required>
+						</div>
+
+					</div>
+					<div id="road_div" class="pure-u-1 pure-u-md-1-3">
+						<label for="city">道路名</label>
+						<input id="road_name" class="pure-input-1-2" type="text">
+					</div>
+
+					<button onclick="traffic_form_submit()" type="submit" class="pure-button pure-button-primary">查询</button>
+			</fieldset>
+		</form>
+
+		<form  class="pure-form pure-form-stacked" style="margin: 30px 0px 0px 50px;">
+			<legend>查询结果</legend>
+				<div id="ee" class="pure-u-1 pure-u-md-1-3">
+
+					<input id="result_desc" class="pure-input-1-2" style="height: 100px;" type="text">
+				</div>
+		</form>
+
+
+
+		<script type="text/javascript">
+			document.getElementById("circle_div").style.display = "none";
+			document.getElementById("road_div").style.display = "none";
+			var url = 'http://127.0.0.1:5000/traffic';
+
+			function trafficQuery() {
+				var retangle_value = document.getElementById('retangle_value').value;
+
+				console.log(retangle_value);
+				circle_value = document.getElementById('circle').value;
+				road_value = document.getElementById('road').value;
+				//TODO 测试
+
+				//?retangle_value=116.351147,39.966309;116.357134,39.968727';
+
+				if (retangle_value != '' && retangle_value != null) {
+					url = url + "?retangle_value=" + retangle_value;
+				}
+
+				ajax('GET', url, '', function(str) {
+					//此处是调用名字为aa的txt文件里所有的内容(str)，所以data直接为''
+					//如果需要插入特定参数,则data值为 data='&name='+oText.value;
+					console.log(str); //名字为aa的txt文件里所有的内容
+				});
+
+				//Ajax.get(url, callback())
+
+			}
+
+			function callback(data, data2) {
+				alert('返回的数据：' + data);
+				alert('返回的数据：' + data2);
+			}
+
+
+			//切换为根据矩形范围搜索
+			function retangleClick() {
+				//setAttribute
+				document.getElementById("retangle_div").style.display = "inline";
+				document.getElementById("circle_div").style.display = "none";
+				document.getElementById("road_div").style.display = "none";
+			}
+
+			function circleClick() {
+				document.getElementById("circle_div").style.display = "inline";
+				document.getElementById("retangle_div").style.display = "none";
+				document.getElementById("road_div").style.display = "none";
+			}
+
+			function roadClick() {
+				document.getElementById("road_div").style.display = "inline";
+				document.getElementById("retangle_div").style.display = "none";
+				document.getElementById("circle_div").style.display = "none";
+			}
+
+			function traffic_form_submit() {
+
+				var checked_raio_name = "retangle";
+				var obj = document.getElementsByName("trafficRadio");
+				for (var i = 0; i < obj.length; i++) {
+					if (obj[i].checked) {
+						checked_raio_name = obj[i].value;
+					}
+				}
+				if (checked_raio_name == "retangle") {
+					//矩形
+					var retangle_value = document.getElementById("retangle_value").value;
+					url = url + "?retangle_value=" + retangle_value;
+
+
+				} else if (checked_raio_name == "circle") { //圆形
+					var circle_location = document.getElementById("circle_location").value;
+					var circle_radius = document.getElementById("circle_radius").value;
+
+				} else { //道路名搜索
+					var road_name = document.getElementById("road_name").value;
+
+				}
+
+				var xmlHttp = createXmlHttp();
+
+				xmlHttp.open("GET",
+					url, true);
+				xmlHttp.send(null);
+
+				xmlHttp.onreadystatechange = function() {
+					//            alert(xmlHttp.readyState);
+					if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+						//此时说明响应完毕  我们可以通过xml.responseText 来获取服务器的响应内容(文本内容)
+						result = xmlHttp.responseText;
+						var resultJSon = JSON.parse(result);
+						if(resultJSon.code == 0) {
+							var data = resultJSon['data'];
+							data = JSON.parse(data);
+							var trafficinfo = data['trafficinfo'];
+							var desc = trafficinfo.description;
+							document.getElementById("result_desc").value = desc;
+						}
+					}
+				};
+			};
+
+
+			// 创建XMLHttpRequest对象
+			function createXmlHttp() {
+				var xmlHttp;
+				try {
+					xmlHttp = new XMLHttpRequest();
+				} catch (e) {
+					try {
+						xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+					} catch (e) {
+						try {
+							xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+						} catch (e) {
+							alert("浏览器太老，不能使用ajax");
+						}
+					}
+				}
+
+				return xmlHttp;
+			}
+		</script>
+
+		</body>
